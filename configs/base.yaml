@@ -1,0 +1,27 @@
+# the root name for your api
+name: root
+api:
+    -
+        # method name
+        name: test
+        # method verbs for which this method definition will be available
+        verbs:
+            - GET
+            - POST
+            - PUT
+            - DEL
+        actions:
+            -
+                do: assert
+                params:
+                    vars: 
+                        - id
+                        - pippo
+
+                
+
+            -
+                do: sql
+                params:
+                    stmnt: select * from table where id = {{id}}
+                    out: data
