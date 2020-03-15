@@ -6,7 +6,7 @@ import (
 )
 
 // NewHealthCheckHandler add route for healthcheck
-func (h *Handler) NewHealthCheckHandler() {
+func (h *Handler) AddHealthCheckHandler() {
 	h.router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 }
 

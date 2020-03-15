@@ -3,6 +3,7 @@ package rest
 import (
 	"github.com/gidor/ube/pkg/http/rest/middleware"
 	"github.com/gidor/ube/pkg/infra"
+
 	"github.com/gorilla/mux"
 )
 
@@ -19,7 +20,12 @@ type HTTPError struct {
 }
 
 // CreateHandler create a new http rest handler
-func CreateHandler(l *infra.Logger) *Handler {
+func CreateHandlerv0(l *infra.Logger) *Handler {
+	return CreateHandler()
+}
+
+func CreateHandler() *Handler {
+	l, _ := infra.GetLogger()
 	h := &Handler{
 		logger: l,
 		router: mux.NewRouter(),

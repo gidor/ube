@@ -4,13 +4,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gidor/ube/test"
 	"github.com/gorilla/mux"
 )
 
 func TestCreateHandler(t *testing.T) {
-	logger, _ := test.LoggerMock()
-	handler := CreateHandler(logger)
+	// logger, _ := test.LoggerMock()
+	handler := CreateHandler()
 
 	expectedRouterType := reflect.TypeOf(mux.NewRouter())
 	if r := reflect.TypeOf(handler.GetRouter()); r != expectedRouterType {
