@@ -47,6 +47,7 @@ func run() error {
 	// setup routes
 	restHandler := rest.CreateHandler()
 	restHandler.AddHealthCheckHandler()
+	restHandler.AddApi()
 
 	// listen and serve
 	// webServer := server.CreateServer(restHandler.GetRouter(), ":"+os.Getenv("HTTP_PORT"))

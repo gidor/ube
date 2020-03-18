@@ -17,11 +17,8 @@ api:
                     vars: 
                         - id
                         - pippo
-
-                
-
             -
                 do: sql
                 params:
-                    stmnt: select * from table where id = {{id}}
+                    stmnt: 'select * from table where id = {{id}}'
                     out: data
