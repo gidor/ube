@@ -2,7 +2,7 @@
 name: musewow
 dataconnection:
     type: postgres
-    string: database=musewowdb host=musewow.cxku6dnd4cz6.eu-central-1.rds.amazonaws.com user=musewow pwd=musewowpwd port=5432 connect_timeout=20
+    string: database=musewowdb host=musewow.cxku6dnd4cz6.eu-central-1.rds.amazonaws.com user=musewow password=musewowpwd port=5432 connect_timeout=20
     # string: dbname=wip user=muse password=muse host=localhost port=5432 connect_timeout=20
     # * dbname - The name of the database to connect to
     # * user - The user to sign in as
@@ -37,7 +37,7 @@ api:
             -
                 do: sql
                 params:
-                    stmnt: 'select * from panorama where id = {{id}}'
+                    stmnt: 'select * from panorama where id_panorama = {{{id}}}'
                     out: data
     -
         # method name
