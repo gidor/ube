@@ -32,7 +32,7 @@ func CreateHandler() *Handler {
 	}
 	mw := middleware.CreateMiddleware(h.logger)
 
-	h.router.Use(mw.JSONResponse)
+	// h.router.Use(mw.JSONResponse)
 	h.router.Use(mw.Logging)
 
 	return h
