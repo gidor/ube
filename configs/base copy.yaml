@@ -1,0 +1,64 @@
+# the root name for your api
+name: musewow
+dataconnection:
+    type: postgres
+    string: database=musewowdb host=musewow.cxku6dnd4cz6.eu-central-1.rds.amazonaws.com user=musewow password=musewowpwd port=5432 connect_timeout=20
+    # string: dbname=wip user=muse password=muse host=localhost port=5432 connect_timeout=20
+    # * dbname - The name of the database to connect to
+    # * user - The user to sign in as
+    # * password - The user's password
+    # * host - The host to connect to. Values that start with / are for unix
+    #   domain sockets. (default is localhost)
+    # * port - The port to bind to. (default is 5432)
+    # * sslmode - Whether or not to use SSL (default is require, this is not
+    #   the default for libpq)
+    # * fallback_application_name - An application_name to fall back to if one isn't provided.
+    # * connect_timeout - Maximum wait for connection, in seconds. Zero or
+    #   not specified means wait indefinitely.
+    # * sslcert - Cert file location. The file must contain PEM encoded data.
+    # * sslkey - Key file location. The file must contain PEM encoded data.
+    # * sslrootcert - The location of the root certificate file. The file
+    #   must contain PEM encoded data.
+api:
+    -
+        # method name
+        name: panorama
+        path: panorama/{id}
+        # method verbs for which this method definition will be available
+        verbs:
+            - GET
+        actions:
+            -
+                do: assertdefined
+                params:
+                    vars: 
+                        - id
+                        - pippo
+                    onerror: 400
+            -
+                do: sql
+                params:
+                    stmnt: 'select * from panorama where id_panorama = {{{id}}}'
+                    out: data
+    -
+        # method name
+        name: test
+        path: test/{id}
+        # method verbs for which this method definition will be available
+        verbs:
+            - GET
+            - POST
+            - PUT
+            - DEL
+        actions:
+            -
+                do: assert
+                params:
+                    vars: 
+                        - id
+                        - pippo
+            -
+                do: sql
+                params:
+                    stmnt: 'select * from panorama where id = {{id}}'
+                    out: data

@@ -9,7 +9,9 @@ import (
 )
 
 // CreateServer create a new http server
-func CreateServer(router *mux.Router, serverAddress string) *http.Server {
+func CreateServer(router *mux.Router) *http.Server {
+	adress := ":" + Getenv("ube_port", "8080")
+
 	// See https://blog.bracebin.com/achieving-perfect-ssl-labs-score-with-go
 	tlsConfig := &tls.Config{
 		MinVersion:               tls.VersionTLS12,
@@ -24,7 +26,8 @@ func CreateServer(router *mux.Router, serverAddress string) *http.Server {
 	}
 
 	server := &http.Server{
-		Addr:         serverAddress,
+		// Addr:         serverAddress,
+		Addr:         adress,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,
