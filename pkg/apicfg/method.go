@@ -17,13 +17,18 @@ func (m ApiMethod) Handler(w http.ResponseWriter, r *http.Request) {
 	info := new(RuntimeInfo)
 	info.current = m.self
 	info.context = make(ParamsType)
+	info.headers = make(map[string]string)
 	// get paramaters in path using gorilla mux
 	for k, v := range mux.Vars(r) {
 		info.context[k] = v
 	}
 
 	for k, v := range r.URL.Query() {
-		info.context[k] = v
+		if len(v) == 1 {
+			info.context[k] = v[0]
+		} else {
+			info.context[k] = v
+		}
 	}
 	if r.Method == "POST" || r.Method == "PUT" || r.Method == "PATCH" {
 		contenttype := r.Header.Get("Content-Type")
@@ -31,7 +36,11 @@ func (m ApiMethod) Handler(w http.ResponseWriter, r *http.Request) {
 			err := r.ParseForm()
 			if err == nil {
 				for k, v := range r.PostForm {
-					info.context[k] = v
+					if len(v) == 1 {
+						info.context[k] = v[0]
+					} else {
+						info.context[k] = v
+					}
 				}
 			}
 		} else if contenttype == "application/json" || contenttype == "application/javascript" {
@@ -49,14 +58,19 @@ func (m ApiMethod) Handler(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-		} else if contenttype == "multipart/form-data" {
+		} else if contenttype[0:19] == "multipart/form-data" {
 			// TODO manage multipart form-data and file upload
 			err := r.ParseMultipartForm(32 << 20)
 			if err == nil {
 				// r.FormFile()
-
+				for k, v := range r.PostForm {
+					if len(v) == 1 {
+						info.context[k] = v[0]
+					} else {
+						info.context[k] = v
+					}
+				}
 			}
-
 		} else {
 			err := r.ParseForm()
 			if err == nil {
@@ -70,13 +84,12 @@ func (m ApiMethod) Handler(w http.ResponseWriter, r *http.Request) {
 
 	// execute method
 	m.execute(info)
-	w.WriteHeader(info.status)
 	// set headers
 	for k, v := range info.headers {
-		w.Header().Set(k, v)
+		w.Header().Add(k, v)
 	}
 	if info.todo == jsonEncode {
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Add("Content-Type", "application/json")
 	}
 	if info.status > 0 {
 		w.WriteHeader(info.status)
@@ -90,6 +103,7 @@ func (m ApiMethod) Handler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			io.WriteString(w, fmt.Sprintf(`{"error": "while marshaling data: %s"}`, err.Error()))
 		}
+		// io.WriteString(w, fmt.Sprintf(`{"error": "while marshaling data: %s"}`, err.Error()))
 		w.Write(b)
 	}
 }

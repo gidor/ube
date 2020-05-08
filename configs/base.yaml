@@ -2,7 +2,7 @@
 name: musewow
 dataconnection:
     type: postgres
-    string: database=musewowdb host=musewow.cxku6dnd4cz6.eu-central-1.rds.amazonaws.com user=musewow password=musewowpwd port=5432 connect_timeout=20
+    string: database=musewowdb host=xxxxxxxxxxx user=xxxxxxxxxxx password=xxxxxxxxxxx port=5432 connect_timeout=20
     # string: dbname=wip user=muse password=muse host=localhost port=5432 connect_timeout=20
     # * dbname - The name of the database to connect to
     # * user - The user to sign in as
@@ -20,6 +20,7 @@ dataconnection:
     # * sslrootcert - The location of the root certificate file. The file
     #   must contain PEM encoded data.
 api:
+    # panorama
     -
         # method name
         name: panorama
@@ -28,36 +29,259 @@ api:
         verbs:
             - GET
         actions:
-            -
-                do: assert
+            -   do: setheader
                 params:
-                    vars: 
-                        - id
-                        - pippo
-            -
-                do: sql
+                    Access-Control-Allow-Origin: '*'
+            -   do: sql
                 params:
-                    stmnt: 'select * from panorama where id_panorama = {{{id}}}'
+                    stmnt: |
+                        select 
+                            g.id_gruppo, 
+                            g.nome_gruppo, 
+                            s.id_stanza, 
+                            s.nome_stanza,
+                            p.id_panorama, 
+                            p.titolo, 
+                            p.descr_panorama, 
+                            p.descr_oggetti, 
+                            p.immagine 
+                        from 
+                            gruppo g, panorama p, r_gruppo_stanza r, stanza s
+                        where 
+                            g.id_gruppo = r.fk_gruppo 
+                            and r.id_gruppo_stanza = p.fk_gruppo_stanza  
+                            and r.fk_stanza = s.id_stanza
+                            and id_panorama = {{{id}}}
                     out: data
+    # list panorama
     -
-        # method name
-        name: test
-        path: test/{id}
+                # method name
+        name: panorama
+        path: panorama
         # method verbs for which this method definition will be available
         verbs:
             - GET
-            - POST
-            - PUT
-            - DEL
         actions:
-            -
-                do: assert
+            -   do: setheader
                 params:
-                    vars: 
-                        - id
-                        - pippo
-            -
-                do: sql
+                    Access-Control-Allow-Origin: '*'
+            
+            -   do: sql
                 params:
-                    stmnt: 'select * from panorama where id = {{id}}'
+                    stmnt: |
+                        select 
+                            g.id_gruppo, 
+                            g.nome_gruppo, 
+                            s.id_stanza, 
+                            s.nome_stanza,
+                            p.id_panorama, 
+                            p.titolo, 
+                            p.descr_panorama, 
+                            p.descr_oggetti, 
+                            p.immagine 
+                        from 
+                            gruppo g, panorama p, r_gruppo_stanza r, stanza s
+                        where 
+                            g.id_gruppo = r.fk_gruppo 
+                            and r.id_gruppo_stanza = p.fk_gruppo_stanza  
+                            and r.fk_stanza = s.id_stanza
+                    out: data
+
+    # -- crea stanza
+    -
+        name: creastanza
+        path: gruppo/{id_gruppo}/stanza
+        # method verbs for which this method definition will be available
+        ## id_museo nome_stanza
+        verbs:
+            - POST
+        actions:
+            -   do: setheader
+                params:
+                    Access-Control-Allow-Origin: '*'
+            
+            -   do: sql
+                params:
+                    stmnt: |
+                        insert into stanza (fk_museo, nome_stanza) 
+                        values ({{{id_museo}}}, '{{{nome_stanza}}}')
+                        returning id_stanza
+                    out: context
+            -   do: sql
+                params:
+                    stmnt: |
+                        insert into r_gruppo_stanza (fk_gruppo, fk_stanza) 
+                        values ({{{id_gruppo}}}, {{{id_stanza}}})
+                        returning fk_stanza as id_stanza
+                    out: data
+                
+        
+    # -- crea panorama
+    -
+        name: creapanorama
+        path: gruppo/{id_gruppo}/panorama
+        # method verbs for which this method definition will be available
+        ## id_stanza, titolo, descr_panorama, descr_oggetti, immagine)
+        verbs:
+            - POST
+        actions:
+            -   do: setheader
+                params:
+                    Access-Control-Allow-Origin: '*'
+
+            -   do: sql
+                params:
+                    stmnt: |
+                        insert into r_gruppo_stanza (fk_gruppo, fk_stanza) 
+                        values ({{{id_gruppo}}}, {{id_stanza}})
+                        returning id_gruppo_stanza
+                    out: context
+            -   do: sql
+                params:
+                    stmnt: |
+                        insert into panorama (fk_gruppo_stanza,titolo, descr_panorama, descr_oggetti, immagine ) 
+                        values ({{{id_gruppo_stanza}}}, '{{{titolo}}}', '{{{descr_panorama}}}', '{{{descr_oggetti}}}', '{{{immagine}}}')
+                        returning id_panorama
+                    out: data
+    
+    # -- elenco gruppi 
+    -
+        name: gruppi
+        path: gruppi
+        verbs:
+            - GET
+        actions:
+            -   do: setheader
+                params:
+                    Access-Control-Allow-Origin: '*'
+
+            -   do: sql
+                params:
+                    stmnt: |
+                        select 
+                            g.id_gruppo, 
+                            g.nome_gruppo, 
+                            g.pwd_gruppo, 
+                            g.classe, 
+                            g.anno_scolastico, 
+                            g.scuola, 
+                            g.citta_scuola
+                        from 
+                            gruppo g
+
+        
+    # -- elenco gruppi e bambini (tutti i dettagli dei gruppi sono solo qui)
+    -
+        name: alunnigruppo
+        path: gruppo/{id_gruppo}/alunni
+        verbs:
+            - GET
+        actions:
+            -   do: setheader
+                params:
+                    Access-Control-Allow-Origin: '*'
+
+            -   do: sql
+                params:
+                    stmnt: |
+                        select 
+                            g.id_gruppo, 
+                            g.nome_gruppo, 
+                            g.pwd_gruppo, 
+                            g.classe, 
+                            g.anno_scolastico, 
+                            g.scuola, 
+                            g.citta_scuola, 
+                            a.id_alunno, 
+                            a.nome_alunno 
+                        from 
+                            gruppo g, alunno a
+                        where 
+                            g.id_gruppo = a.fk_gruppo 
+                            and g.id_gruppo = {{{id_gruppo}}}
+
+        
+    # -- per ogni gruppo elenco stanze
+    -
+        name: stanzegruppo
+        path: gruppo/{id_gruppo}/stanze
+        verbs:
+            - GET
+        actions:
+            -   do: setheader
+                params:
+                    Access-Control-Allow-Origin: '*'
+            -   do: sql
+                params:
+                    stmnt: |
+                        select 
+                            g.id_gruppo, 
+                            g.nome_gruppo, 
+                            s.id_stanza, 
+                            s.nome_stanza 
+                        from 
+                            gruppo g, stanza s, r_gruppo_stanza r
+                        where 
+                            g.id_gruppo = r.fk_gruppo 
+                            and s.id_stanza = r.fk_stanza 
+                            and g.id_gruppo = {{{id_gruppo}}}
+        
+    # -- per ogni gruppo elenco panorami
+    -
+        name: panoramigruppo
+        path: gruppo/{id_gruppo}/panorami
+        verbs:
+            - GET
+        actions:
+            -   do: setheader
+                params:
+                    Access-Control-Allow-Origin: '*'
+
+            -   do: sql
+                params:
+                    stmnt: |
+                        select 
+                            g.id_gruppo, 
+                            g.nome_gruppo, 
+                            s.id_stanza, 
+                            s.nome_stanza,
+                            p.id_panorama, 
+                            p.titolo, 
+                            p.descr_panorama, 
+                            p.descr_oggetti, 
+                            p.immagine 
+                        from 
+                            gruppo g, panorama p, r_gruppo_stanza r, stanza s
+                        where 
+                            g.id_gruppo = r.fk_gruppo 
+                            and r.id_gruppo_stanza = p.fk_gruppo_stanza  
+                            and r.fk_stanza = s.id_stanza
+                            and g.id_gruppo = {{{id_gruppo}}}
+                    out: data
+    # -- gruppo login 
+    -
+        name: gruppologin
+        path: gruppo/login
+        verbs:
+            - POST
+        actions:
+            -   do: setheader
+                params:
+                    Access-Control-Allow-Origin: '*'
+
+            -   do: sql
+                params:
+                    stmnt: |
+                        SELECT 
+                            id_gruppo, 
+                            nome_gruppo, 
+                            pwd_gruppo, 
+                            classe, 
+                            anno_scolastico, 
+                            scuola, 
+                            citta_scuola
+                        FROM musewow.gruppo
+                            where 
+                                nome_gruppo = '{{{gruppo}}}'
+                                and pwd_gruppo = '{{{pwd}}}'
                     out: data

@@ -51,7 +51,7 @@ func run() error {
 
 	// listen and serve
 	// webServer := server.CreateServer(restHandler.GetRouter(), ":"+os.Getenv("HTTP_PORT"))
-	webServer := infra.CreateServer(restHandler.GetRouter(), ":3000")
+	webServer := infra.CreateServer(restHandler.GetRouter())
 	log.Println("starting server...")
 	return webServer.ListenAndServe()
 }

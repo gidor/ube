@@ -15,6 +15,8 @@ func (h *Handler) AddApi() {
 	cfg, err := apicfg.GetApiCfg()
 	if err != nil {
 		h.logger.Log.Error("errorereading cfg")
+		h.logger.Log.Error(err.Error())
+		panic(1)
 	}
 	print(cfg)
 	for i := 0; i < len(cfg.Api); i++ {

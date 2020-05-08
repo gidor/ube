@@ -1,6 +1,7 @@
 # Mac OS X files
 .DS_Store
 
+bin/**
 vendor/**
 build/**
 !build/.keep
@@ -11,7 +12,7 @@ build/**
 *.dll
 *.so
 *.dylib
-
+priv*
 # Test binary, build with `go test -c`
 *.test
 
